@@ -1,0 +1,7 @@
+flask==2.2.3
+google-auth-oauthlib==1.0.0
+google-auth==2.16.0
+google-api-python-client==2.70.0
+pandas==1.5.3
+scikit-learn==1.2.1
+python-dotenv==0.21.1

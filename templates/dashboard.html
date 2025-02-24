@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <div>
+        <canvas id="stepsChart"></canvas>
+    </div>
+    <div id="healthAnalysis"></div>
+
+    <script>
+        async function fetchFitnessData() {
+            const response = await fetch('/api/fitness-data');
+            const data = await response.json();
+            return data;
+        }
+
+        function renderChart(fitnessData) {
+            const ctx = document.getElementById('stepsChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: fitnessData.map(entry => entry.date),
+                    datasets: [{
+                        label: 'Steps',
+                        data: fitnessData.map(entry => entry.steps),
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderHealthAnalysis(analysis) {
+            const healthAnalysisDiv = document.getElementById('healthAnalysis');
+            healthAnalysisDiv.innerHTML = `
+                <h2>Health Analysis</h2>
+                <p>Risk Score: ${analysis.risk_score}</p>
+                <h3>Risk Factors:</h3>
+                <ul>
+                    ${Object.entries(analysis.risk_factors).map(([key, value]) => `
+                        <li>${key}: ${value ? 'Yes' : 'No'}</li>
+                    `).join('')}
+                </ul>
+                <h3>Recommendations:</h3>
+                <ul>
+                    ${analysis.recommendations.map(rec => `
+                        <li>
+                            <strong>${rec.category}</strong>: ${rec.suggestion}
+                            <ul>
+                                ${rec.action_items.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+
+        async function loadDashboard() {
+            const data = await fetchFitnessData();
+            renderChart(data.fitness_data);
+            renderHealthAnalysis(data.health_analysis);
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>
